@@ -1,0 +1,18 @@
+FROM openjdk:11-jre-slim
+
+# Install Liquibase and its dependencies
+RUN apt-get update && apt-get install -y wget postgresql-client \
+    && wget -O /tmp/liquibase.tar.gz https://github.com/liquibase/liquibase/releases/download/v4.23.0/liquibase-4.23.0.tar.gz \
+    && mkdir -p /usr/local/liquibase \
+    && tar -xzf /tmp/liquibase.tar.gz -C /usr/local/liquibase \
+    && rm /tmp/liquibase.tar.gz \
+    && wget https://jdbc.postgresql.org/download/postgresql-42.6.0.jar -O /usr/local/liquibase/lib/postgresql.jar
+
+ENV LIQUIBASE_HOME /usr/local/liquibase
+ENV PATH $PATH:/usr/local/liquibase
+
+COPY liquibase /liquibase
+COPY run-liquibase.sh /run-liquibase.sh
+RUN chmod +x /run-liquibase.sh
+
+CMD ["/run-liquibase.sh"] 

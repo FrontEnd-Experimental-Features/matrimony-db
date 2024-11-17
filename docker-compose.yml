@@ -4,7 +4,7 @@ services:
   matrimony_postgres:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.postgres
     container_name: ${POSTGRES_CONTAINER_NAME}
     restart: unless-stopped
     ports:
@@ -25,7 +25,7 @@ services:
   matrimony_liquibase:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.liquibase
     container_name: ${LIQUIBASE_CONTAINER_NAME}
     depends_on:
       matrimony_postgres:
@@ -37,7 +37,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_DB: ${POSTGRES_DB}
       LIQUIBASE_HOME: ${LIQUIBASE_HOME}
-    command: ["/bin/sh", "-c", "/run-liquibase.sh"]
     env_file: .env
 
 volumes:
