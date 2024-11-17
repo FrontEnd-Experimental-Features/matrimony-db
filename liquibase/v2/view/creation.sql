@@ -4,7 +4,7 @@ SELECT
     ud.user_name,
     ud.date_of_birth,
     ud.is_verified_flag,
-    ud.gender
+    ud.gender,
     cd.phone,
     cd.email,
     cd.current_location,
