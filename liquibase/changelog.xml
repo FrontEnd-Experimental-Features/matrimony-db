@@ -10,4 +10,6 @@
     <include file="v1/user-profile/insertion.sql" relativeToChangelogFile="true"/>
     <include file="v2/alter/alter.sql" relativeToChangelogFile="true"/>
     <include file="v2/view/creation.sql" relativeToChangelogFile="true"/>
+    <include file="v3/cred/user-cred.sql" relativeToChangelogFile="true"/>
+    
 </databaseChangeLog>
