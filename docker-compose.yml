@@ -22,7 +22,7 @@ services:
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}
     networks:
-      - ${NETWORK_NAME}  
+      - matrimony_network  
 
   matrimony_liquibase:
     build:
@@ -41,10 +41,10 @@ services:
       LIQUIBASE_HOME: ${LIQUIBASE_HOME} 
     env_file: .env  
     networks:
-      - ${NETWORK_NAME}  
+      - matrimony_network  
 
 networks:
-  ${NETWORK_NAME}:  
+  matrimony_network:  
     external: true  
 
 volumes:
