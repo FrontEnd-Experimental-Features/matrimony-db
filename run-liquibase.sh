@@ -25,7 +25,7 @@ echo "PostgreSQL is ready. Running Liquibase..."
 
 # Run Liquibase
 set -x
-$LIQUIBASE_HOME/liquibase \
+$LIQUIBASE_HOME \
   --changelog-file=/liquibase/changelog.xml \
   --url="jdbc:postgresql://matrimony_postgres:5432/$POSTGRES_DB" \
   --username="$POSTGRES_USER" \
