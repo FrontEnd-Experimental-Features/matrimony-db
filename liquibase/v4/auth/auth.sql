@@ -50,5 +50,14 @@ $$ LANGUAGE plpgsql STRICT SECURITY DEFINER;
 -- Comment to explain the function
 COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS 'Authenticates a user and returns their details';
 
--- Grant execute permission to the postgraphile user
+-- Create a dedicated user for postgraphile
+CREATE ROLE postgraphile LOGIN PASSWORD 'your_password';
+
+-- Grant usage on the schema
+GRANT USAGE ON SCHEMA public TO postgraphile;
+
+-- Grant execute on specific functions
 GRANT EXECUTE ON FUNCTION public.authenticate(public.authenticate_input) TO postgraphile;
+
+-- Grant select on necessary tables (if needed)
+GRANT SELECT ON TABLE public.user_details TO postgraphile;
