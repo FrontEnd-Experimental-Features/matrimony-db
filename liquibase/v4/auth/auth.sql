@@ -1,63 +1,47 @@
--- Create a composite type for the authentication result
-CREATE TYPE public.auth_result AS (
-  user_details json
+-- Drop everything first
+DROP FUNCTION IF EXISTS public.authenticate CASCADE;
+DROP TYPE IF EXISTS public.authenticate_input CASCADE;
+DROP TYPE IF EXISTS public.authenticate_input_record CASCADE;
+
+-- Create the types
+CREATE TYPE public.authenticate_input_record AS (
+    email text,
+    password text
 );
 
--- Create a type to represent the authentication input
 CREATE TYPE public.authenticate_input AS (
-  email text,
-  password text
+    input public.authenticate_input_record
 );
 
--- Create the authentication function
+-- Create a simpler authentication function
 CREATE OR REPLACE FUNCTION public.authenticate(
-  input public.authenticate_input
-) RETURNS public.auth_result AS $$
-DECLARE
-  result public.auth_result;
-  user_id int;
-  _password_matches boolean;
-BEGIN
-  -- First, verify the credentials
-  SELECT ud.id, (uc.password_hash = crypt(input.password, uc.password_hash))
-  INTO user_id, _password_matches
-  FROM public.user_details ud
-  JOIN public.contact_details cd ON ud.id = cd.user_id
-  JOIN public.user_credentials uc ON ud.id = uc.user_id
-  WHERE cd.email = input.email;
+    auth public.authenticate_input
+)
+    RETURNS json
+    LANGUAGE sql
+    STABLE
+    SECURITY DEFINER
+AS $$
+    SELECT 
+        CASE 
+            WHEN uc.password_hash = crypt(auth.input.password, uc.password_hash) THEN
+                json_build_object(
+                    'id', ud.id,
+                    'userName', ud.user_name,
+                    'dateOfBirth', ud.date_of_birth,
+                    'gender', ud.gender,
+                    'isVerifiedFlag', ud.is_verified_flag
+                )
+            ELSE NULL
+        END
+    FROM contact_details cd
+    JOIN user_credentials uc ON uc.user_id = cd.user_id
+    JOIN user_details ud ON ud.id = cd.user_id
+    WHERE cd.email = auth.input.email
+    LIMIT 1;
+$$;
 
-  -- If no user found or password doesn't match, raise an error
-  IF user_id IS NULL OR NOT _password_matches THEN
-    RAISE EXCEPTION 'Invalid email or password';
-  END IF;
-
-  -- Get user details
-  SELECT json_build_object(
-    'id', ud.id,
-    'userName', ud.user_name,
-    'dateOfBirth', ud.date_of_birth,
-    'gender', ud.gender,
-    'isVerifiedFlag', ud.is_verified_flag
-  )
-  INTO result.user_details
-  FROM public.user_details ud
-  WHERE ud.id = user_id;
-
-  RETURN result;
-END;
-$$ LANGUAGE plpgsql STRICT SECURITY DEFINER;
-
--- Comment to explain the function
-COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS 'Authenticates a user and returns their details';
-
--- Create a dedicated user for postgraphile
-CREATE ROLE postgraphile LOGIN PASSWORD 'your_password';
-
--- Grant usage on the schema
-GRANT USAGE ON SCHEMA public TO postgraphile;
-
--- Grant execute on specific functions
+-- Grant permissions
 GRANT EXECUTE ON FUNCTION public.authenticate(public.authenticate_input) TO postgraphile;
 
--- Grant select on necessary tables (if needed)
-GRANT SELECT ON TABLE public.user_details TO postgraphile;
+COMMIT;
