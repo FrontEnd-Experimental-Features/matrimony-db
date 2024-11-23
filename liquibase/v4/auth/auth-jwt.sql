@@ -111,8 +111,6 @@ END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
 -- Create authentication function
-COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@graphql({"name": "login"})\n@resultFieldName loginResult\nHandles user authentication and returns JWT token';
-
 CREATE OR REPLACE FUNCTION public.authenticate(
     auth public.authenticate_input
 )
@@ -163,6 +161,9 @@ BEGIN
     RETURN ROW(user_details, NULL::text)::public.auth_result;
 END;
 $$;
+
+-- Add comment to authentication function after it's created
+COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@graphql({"name": "login"})\n@resultFieldName loginResult\nHandles user authentication and returns JWT token';
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO matrimony_user;
