@@ -80,17 +80,30 @@ SELECT
 FROM signdata;
 $$;
 
+-- Create configuration table
+CREATE TABLE IF NOT EXISTS public.config (
+    key text PRIMARY KEY,
+    value text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert placeholder for JWT secret (actual secret will be set by the application)
+INSERT INTO public.config (key, value) 
+VALUES ('jwt.secret', 'PLACEHOLDER_JWT_SECRET_TO_BE_SET_BY_APP') 
+ON CONFLICT (key) DO NOTHING;
+
 -- Function to generate JWT token
 CREATE OR REPLACE FUNCTION public.generate_jwt(user_id integer)
 RETURNS text AS $$
 DECLARE
     jwt_secret text;
 BEGIN
-    -- Get JWT secret from PostGraphile environment variable
-    SELECT current_setting('jwt.secret', true) INTO jwt_secret;
+    -- Get JWT secret from config table
+    SELECT value INTO jwt_secret FROM public.config WHERE key = 'jwt.secret';
     
-    IF jwt_secret IS NULL THEN
-        RAISE EXCEPTION 'JWT_SECRET is not set';
+    IF jwt_secret IS NULL OR jwt_secret = 'PLACEHOLDER_JWT_SECRET_TO_BE_SET_BY_APP' THEN
+        RAISE EXCEPTION 'JWT secret has not been initialized by the application';
     END IF;
 
     RETURN jwt.sign(
@@ -165,6 +178,7 @@ GRANT EXECUTE ON FUNCTION jwt.url_encode(bytea) TO postgraphile;
 GRANT SELECT ON TABLE public.contact_details TO matrimony_user;
 GRANT SELECT ON TABLE public.user_credentials TO matrimony_user;
 GRANT SELECT ON TABLE public.user_details TO matrimony_user;
+GRANT SELECT ON TABLE public.config TO matrimony_user;
 GRANT USAGE ON SCHEMA jwt TO postgraphile;
 
 COMMIT;
