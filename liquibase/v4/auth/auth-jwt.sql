@@ -1,5 +1,8 @@
 -- Set JWT secret at database level
-ALTER DATABASE matrimony SET jwt.secret TO current_setting('JWT_SECRET');
+DO $$
+BEGIN
+    EXECUTE 'ALTER DATABASE matrimony SET jwt.secret TO ''' || current_setting('JWT_SECRET') || '''';
+END $$;
 
 -- Drop existing objects
 DROP FUNCTION IF EXISTS public.authenticate CASCADE;
