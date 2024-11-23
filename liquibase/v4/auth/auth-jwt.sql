@@ -1,13 +1,3 @@
--- Set JWT secret at database level
-DO $$
-BEGIN
-    -- First set the JWT_SECRET parameter
-    PERFORM set_config('jwt.secret', current_setting('JWT_SECRET', true), false);
-    
-    -- Then set it at database level
-    EXECUTE 'ALTER DATABASE matrimony SET jwt.secret TO ''' || current_setting('jwt.secret') || '''';
-END $$;
-
 -- Drop existing objects
 DROP FUNCTION IF EXISTS public.authenticate CASCADE;
 DROP TYPE IF EXISTS public.authenticate_input CASCADE;
