@@ -1,3 +1,6 @@
+-- Set JWT secret at database level
+ALTER DATABASE matrimony SET jwt.secret TO current_setting('JWT_SECRET');
+
 -- Drop existing objects
 DROP FUNCTION IF EXISTS public.authenticate CASCADE;
 DROP TYPE IF EXISTS public.authenticate_input CASCADE;
@@ -145,15 +148,6 @@ BEGIN
     RETURN ROW(user_details, NULL::text)::public.auth_result;
 END;
 $$;
-
--- Set JWT secret from PostGraphile
-DO $$ 
-BEGIN 
-    PERFORM set_config('jwt.secret', current_setting('jwt_secret'), false);
-EXCEPTION 
-    WHEN undefined_object THEN 
-        RAISE EXCEPTION 'JWT_SECRET environment variable is not set in PostGraphile configuration';
-END $$;
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO matrimony_user;
