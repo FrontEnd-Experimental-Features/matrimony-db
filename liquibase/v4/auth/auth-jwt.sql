@@ -161,14 +161,14 @@ $$;
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO matrimony_user;
-GRANT EXECUTE ON FUNCTION public.authenticate(public.authenticate_input) TO postgraphile;
-GRANT EXECUTE ON FUNCTION public.generate_jwt(integer) TO postgraphile;
-GRANT EXECUTE ON FUNCTION jwt.sign(json, text, text) TO postgraphile;
-GRANT EXECUTE ON FUNCTION jwt.url_encode(bytea) TO postgraphile;
+GRANT EXECUTE ON FUNCTION public.authenticate(public.authenticate_input) TO matrimony_user;
+GRANT EXECUTE ON FUNCTION public.generate_jwt(integer) TO matrimony_user;
+GRANT EXECUTE ON FUNCTION jwt.sign(json, text, text) TO matrimony_user;
+GRANT EXECUTE ON FUNCTION jwt.url_encode(bytea) TO matrimony_user;
 GRANT SELECT ON TABLE public.contact_details TO matrimony_user;
 GRANT SELECT ON TABLE public.user_credentials TO matrimony_user;
 GRANT SELECT ON TABLE public.user_details TO matrimony_user;
 GRANT SELECT ON TABLE public.config TO matrimony_user;
-GRANT USAGE ON SCHEMA jwt TO postgraphile;
+GRANT USAGE ON SCHEMA jwt TO matrimony_user;
 
 COMMIT;
