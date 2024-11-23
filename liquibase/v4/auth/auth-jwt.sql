@@ -21,19 +21,19 @@ CREATE TYPE public.authenticate_input_record AS (
     email text,
     password text
 );
-COMMENT ON TYPE public.authenticate_input_record IS E'@name LoginCredentials';
+COMMENT ON TYPE public.authenticate_input_record IS E'@graphql({"name": "LoginCredentials"})\nInput type for login credentials';
 
 CREATE TYPE public.authenticate_input AS (
     input public.authenticate_input_record
 );
-COMMENT ON TYPE public.authenticate_input IS E'@name LoginInput';
+COMMENT ON TYPE public.authenticate_input IS E'@graphql({"name": "LoginInput"})\nInput wrapper for login mutation';
 
 -- Create result type
 CREATE TYPE public.auth_result AS (
     auth_result json,
     client_mutation_id text
 );
-COMMENT ON TYPE public.auth_result IS E'@name LoginPayload';
+COMMENT ON TYPE public.auth_result IS E'@graphql({"name": "LoginPayload"})\nResponse type for login mutation';
 
 -- Create JWT schema
 CREATE SCHEMA IF NOT EXISTS jwt;
@@ -111,6 +111,8 @@ END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
 -- Create authentication function
+COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@graphql({"name": "login"})\n@resultFieldName loginResult\nHandles user authentication and returns JWT token';
+
 CREATE OR REPLACE FUNCTION public.authenticate(
     auth public.authenticate_input
 )
