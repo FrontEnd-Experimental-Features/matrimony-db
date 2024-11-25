@@ -103,10 +103,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
-/**
- * @name authenticate
- * @type mutation
- */
+-- Create authentication function
 CREATE OR REPLACE FUNCTION public.authenticate(
     auth public.authenticate_input
 )
@@ -171,12 +168,9 @@ GRANT SELECT ON TABLE public.config TO matrimony_user;
 GRANT USAGE ON SCHEMA jwt TO matrimony_user;
 
 -- Add comments for PostGraphile
-COMMENT ON TYPE public.authenticate_input IS E'@name AuthenticateInput\n@graphql input';
-COMMENT ON TYPE public.auth_result IS E'@name AuthenticatePayload\n@graphql type';
-COMMENT ON FUNCTION public.authenticate IS E'@name authenticate
-@type mutation
-Returns the authenticated user details along with a JWT token.
-@arg auth The authentication input containing email and password
-@resultType AuthenticatePayload';
+COMMENT ON TYPE public.authenticate_input IS E'Input type for authentication.';
+COMMENT ON TYPE public.auth_result IS E'Result type for authentication.';
+COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@name authenticate
+Authenticates a user and returns JWT token with user details.';
 
 COMMIT;
