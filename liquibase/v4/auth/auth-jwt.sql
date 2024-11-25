@@ -21,19 +21,16 @@ CREATE TYPE public.authenticate_input_record AS (
     email text,
     password text
 );
-COMMENT ON TYPE public.authenticate_input_record IS E'@name LoginCredentialsInput';
 
 CREATE TYPE public.authenticate_input AS (
     input public.authenticate_input_record
 );
-COMMENT ON TYPE public.authenticate_input IS E'@name AuthenticateInput';
 
 -- Create result type
 CREATE TYPE public.auth_result AS (
     auth_result json,
     client_mutation_id text
 );
-COMMENT ON TYPE public.auth_result IS E'@name AuthenticatePayload';
 
 -- Create JWT schema
 CREATE SCHEMA IF NOT EXISTS jwt;
@@ -162,8 +159,6 @@ BEGIN
 END;
 $$;
 
--- Add comment to authentication function after it's created
-COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@name authenticate\nHandles user authentication and returns JWT token';
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO matrimony_user;
