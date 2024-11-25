@@ -16,10 +16,14 @@ BEGIN
 END
 $$;
 
--- Create input type
-CREATE TYPE public.authenticate_input AS (
+-- Create input types
+CREATE TYPE public.auth_credentials AS (
     email text,
     password text
+);
+
+CREATE TYPE public.authenticate_input AS (
+    auth auth_credentials
 );
 
 -- Create result type
@@ -105,11 +109,11 @@ $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
 -- Create authentication function
 CREATE OR REPLACE FUNCTION public.authenticate(
-    auth public.authenticate_input
+    input public.authenticate_input
 )
     RETURNS public.auth_result
     LANGUAGE plpgsql
-    STABLE
+    VOLATILE
     SECURITY DEFINER
 AS $$
 DECLARE
@@ -121,14 +125,14 @@ BEGIN
     FROM contact_details cd
     JOIN user_credentials uc ON uc.user_id = cd.user_id
     JOIN user_details ud ON ud.id = cd.user_id
-    WHERE cd.email = (auth).email
-    AND uc.password_hash = crypt((auth).password, uc.password_hash)
+    WHERE cd.email = (input.auth).email
+    AND uc.password_hash = crypt((input.auth).password, uc.password_hash)
     LIMIT 1;
 
     -- Then get user details
     SELECT 
         CASE 
-            WHEN uc.password_hash = crypt((auth).password, uc.password_hash) THEN
+            WHEN uc.password_hash = crypt((input.auth).password, uc.password_hash) THEN
                 json_build_object(
                     'userDetails', json_build_object(
                         'id', ud.id,
@@ -144,7 +148,7 @@ BEGIN
     FROM contact_details cd
     JOIN user_credentials uc ON uc.user_id = cd.user_id
     JOIN user_details ud ON ud.id = cd.user_id
-    WHERE cd.email = (auth).email
+    WHERE cd.email = (input.auth).email
     LIMIT 1;
 
     IF user_details IS NULL THEN
@@ -168,9 +172,11 @@ GRANT SELECT ON TABLE public.config TO matrimony_user;
 GRANT USAGE ON SCHEMA jwt TO matrimony_user;
 
 -- Add comments for PostGraphile
-COMMENT ON TYPE public.authenticate_input IS E'Input type for authentication.';
-COMMENT ON TYPE public.auth_result IS E'Result type for authentication.';
+COMMENT ON TYPE public.auth_credentials IS E'Credentials for authentication';
+COMMENT ON TYPE public.authenticate_input IS E'Input for authentication mutation';
+COMMENT ON TYPE public.auth_result IS E'Result from authentication';
 COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@name authenticate
-Authenticates a user and returns JWT token with user details.';
+@tags mutation
+Authenticates a user and returns JWT token with user details';
 
 COMMIT;
