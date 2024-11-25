@@ -1,7 +1,7 @@
 -- Drop existing objects
 DROP FUNCTION IF EXISTS public.authenticate CASCADE;
 DROP TYPE IF EXISTS public.authenticate_input CASCADE;
-DROP TYPE IF EXISTS public.authenticate_input_record CASCADE;
+DROP TYPE IF EXISTS public.auth_credentials CASCADE;
 DROP TYPE IF EXISTS public.auth_result CASCADE;
 
 -- Create extensions first
@@ -16,19 +16,15 @@ BEGIN
 END
 $$;
 
--- Create input types
-CREATE TYPE public.auth_credentials AS (
+-- Create input type
+CREATE TYPE public.authenticate_input AS (
     email text,
     password text
 );
 
-CREATE TYPE public.authenticate_input AS (
-    auth auth_credentials
-);
-
 -- Create result type
 CREATE TYPE public.auth_result AS (
-    auth_result json,
+    user_details json,
     client_mutation_id text
 );
 
@@ -109,7 +105,7 @@ $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
 -- Create authentication function
 CREATE OR REPLACE FUNCTION public.authenticate(
-    input public.authenticate_input
+    input authenticate_input
 )
     RETURNS public.auth_result
     LANGUAGE plpgsql
@@ -125,30 +121,28 @@ BEGIN
     FROM contact_details cd
     JOIN user_credentials uc ON uc.user_id = cd.user_id
     JOIN user_details ud ON ud.id = cd.user_id
-    WHERE cd.email = (input.auth).email
-    AND uc.password_hash = crypt((input.auth).password, uc.password_hash)
+    WHERE cd.email = (input).email
+    AND uc.password_hash = crypt((input).password, uc.password_hash)
     LIMIT 1;
 
     -- Then get user details
     SELECT 
         CASE 
-            WHEN uc.password_hash = crypt((input.auth).password, uc.password_hash) THEN
+            WHEN uc.password_hash = crypt((input).password, uc.password_hash) THEN
                 json_build_object(
-                    'userDetails', json_build_object(
-                        'id', ud.id,
-                        'userName', ud.user_name,
-                        'dateOfBirth', ud.date_of_birth,
-                        'gender', ud.gender,
-                        'isVerifiedFlag', ud.is_verified_flag,
-                        'jwtToken', jwt_token
-                    )
+                    'id', ud.id,
+                    'userName', ud.user_name,
+                    'dateOfBirth', ud.date_of_birth,
+                    'gender', ud.gender,
+                    'isVerifiedFlag', ud.is_verified_flag,
+                    'jwtToken', jwt_token
                 )
             ELSE NULL
         END INTO user_details
     FROM contact_details cd
     JOIN user_credentials uc ON uc.user_id = cd.user_id
     JOIN user_details ud ON ud.id = cd.user_id
-    WHERE cd.email = (input.auth).email
+    WHERE cd.email = (input).email
     LIMIT 1;
 
     IF user_details IS NULL THEN
@@ -161,7 +155,7 @@ $$;
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO matrimony_user;
-GRANT EXECUTE ON FUNCTION public.authenticate(public.authenticate_input) TO matrimony_user;
+GRANT EXECUTE ON FUNCTION public.authenticate(authenticate_input) TO matrimony_user;
 GRANT EXECUTE ON FUNCTION public.generate_jwt(integer) TO matrimony_user;
 GRANT EXECUTE ON FUNCTION jwt.sign(json, text, text) TO matrimony_user;
 GRANT EXECUTE ON FUNCTION jwt.url_encode(bytea) TO matrimony_user;
@@ -172,10 +166,9 @@ GRANT SELECT ON TABLE public.config TO matrimony_user;
 GRANT USAGE ON SCHEMA jwt TO matrimony_user;
 
 -- Add comments for PostGraphile
-COMMENT ON TYPE public.auth_credentials IS E'Credentials for authentication';
-COMMENT ON TYPE public.authenticate_input IS E'Input for authentication mutation';
-COMMENT ON TYPE public.auth_result IS E'Result from authentication';
-COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@name authenticate
+COMMENT ON TYPE public.authenticate_input IS E'@name AuthenticateInput\nInput for authentication mutation';
+COMMENT ON TYPE public.auth_result IS E'@name AuthenticatePayload\nResult from authentication';
+COMMENT ON FUNCTION public.authenticate(authenticate_input) IS E'@name authenticate
 @tags mutation
 Authenticates a user and returns JWT token with user details';
 
