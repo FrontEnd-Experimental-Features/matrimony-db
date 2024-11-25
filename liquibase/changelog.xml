@@ -13,4 +13,6 @@
     <include file="v3/cred/user-cred.sql" relativeToChangelogFile="true"/>
    <!-- <include file="v4/auth/auth.sql" relativeToChangelogFile="true"/>-->
    <include file="v4/auth/auth-jwt.sql" relativeToChangelogFile="true"/>
+   <include file="v5/login-sessions.sql" relativeToChangelogFile="true"/>
+    <include file="v5/logout-sessions.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
