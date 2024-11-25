@@ -16,14 +16,10 @@ BEGIN
 END
 $$;
 
--- Create input types
-CREATE TYPE public.authenticate_input_record AS (
+-- Create input type (simplified)
+CREATE TYPE public.authenticate_input AS (
     email text,
     password text
-);
-
-CREATE TYPE public.authenticate_input AS (
-    input public.authenticate_input_record
 );
 
 -- Create result type
@@ -125,14 +121,14 @@ BEGIN
     FROM contact_details cd
     JOIN user_credentials uc ON uc.user_id = cd.user_id
     JOIN user_details ud ON ud.id = cd.user_id
-    WHERE cd.email = (auth).input.email
-    AND uc.password_hash = crypt((auth).input.password, uc.password_hash)
+    WHERE cd.email = auth.email
+    AND uc.password_hash = crypt(auth.password, uc.password_hash)
     LIMIT 1;
 
     -- Then get user details
     SELECT 
         CASE 
-            WHEN uc.password_hash = crypt((auth).input.password, uc.password_hash) THEN
+            WHEN uc.password_hash = crypt(auth.password, uc.password_hash) THEN
                 json_build_object(
                     'userDetails', json_build_object(
                         'id', ud.id,
@@ -148,7 +144,7 @@ BEGIN
     FROM contact_details cd
     JOIN user_credentials uc ON uc.user_id = cd.user_id
     JOIN user_details ud ON ud.id = cd.user_id
-    WHERE cd.email = (auth).input.email
+    WHERE cd.email = auth.email
     LIMIT 1;
 
     IF user_details IS NULL THEN
@@ -158,7 +154,6 @@ BEGIN
     RETURN ROW(user_details, NULL::text)::public.auth_result;
 END;
 $$;
-
 
 -- Grant permissions
 GRANT USAGE ON SCHEMA public TO matrimony_user;
@@ -172,10 +167,9 @@ GRANT SELECT ON TABLE public.user_details TO matrimony_user;
 GRANT SELECT ON TABLE public.config TO matrimony_user;
 GRANT USAGE ON SCHEMA jwt TO matrimony_user;
 
-COMMENT ON TYPE public.authenticate_input_record IS E'@graphql({"name": "AuthenticateCredentials"})';
-COMMENT ON TYPE public.authenticate_input IS E'@graphql({"name": "AuthenticateInput"})';
-COMMENT ON TYPE public.auth_result IS E'@graphql({"name": "AuthenticatePayload"})';
-
-COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@graphql({"name": "authenticate"})\n@procedure\nHandles user authentication and returns JWT token';
+-- Add comments for PostGraphile
+COMMENT ON TYPE public.authenticate_input IS E'@name AuthInput';
+COMMENT ON TYPE public.auth_result IS E'@name AuthPayload';
+COMMENT ON FUNCTION public.authenticate(public.authenticate_input) IS E'@name authenticate\n@procedure mutation';
 
 COMMIT;
