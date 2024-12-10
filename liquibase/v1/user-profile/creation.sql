@@ -15,7 +15,7 @@ CREATE TABLE contact_details (
     user_id INT NOT NULL,            -- Foreign key referencing user_details
     phone VARCHAR(15) NULL,      -- Phone number
     email VARCHAR(100) NOT NULL,     -- Email address
-    current_location VARCHAR(100) NOT NULL, -- Current location
+    current_location VARCHAR(100) NULL, -- Current location
     FOREIGN KEY (user_id) REFERENCES user_details(id) -- Foreign key constraint
 );
  
