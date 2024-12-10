@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user_details (
     user_name VARCHAR(50) NOT NULL, -- User Name
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    middle_name VARCHAR(50) NOT NULL,
+    middle_name VARCHAR(50) ,
     gender VARCHAR(10) NOT NULL DEFAULT 'Male',
     is_verified_flag BOOLEAN DEFAULT false -- Verified Flag
 ); 

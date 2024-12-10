@@ -28,8 +28,14 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION generate_user_name()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Concatenate first_name, middle_name, and last_name to form user_name
-    NEW.user_name := CONCAT(NEW.first_name, ' ', NEW.middle_name, ' ', NEW.last_name);
+    -- Check if middle_name is not null
+    IF NEW.middle_name IS NOT NULL THEN
+        -- Concatenate first_name, middle_name, and last_name
+        NEW.user_name := CONCAT(NEW.first_name, ' ', NEW.middle_name, ' ', NEW.last_name);
+    ELSE
+        -- If middle_name is null, concatenate only first_name and last_name
+        NEW.user_name := CONCAT(NEW.first_name, ' ', NEW.last_name);
+    END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
