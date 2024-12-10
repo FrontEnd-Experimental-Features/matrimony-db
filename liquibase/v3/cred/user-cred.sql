@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS user_credentials (
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 INSERT INTO user_credentials (user_id, password_hash) VALUES
-(1, crypt('test1', gen_salt('bf'))),  -- Hashed password for John Doe
-(2, crypt('test2', gen_salt('bf'))), -- Hashed password for Jane Smith
-(3, crypt('test3', gen_salt('bf'))), -- Hashed password for Alice Johnson
-(4, crypt('test4', gen_salt('bf'))), -- Hashed password for Bob Brown
-(5, crypt('test5', gen_salt('bf'))); -- Hashed password for Charlie Davis
+(1, crypt('test11', gen_salt('bf'))),  -- Hashed password for John Doe
+(2, crypt('test22', gen_salt('bf'))), -- Hashed password for Jane Smith
+(3, crypt('test33', gen_salt('bf'))), -- Hashed password for Alice Johnson
+(4, crypt('test44', gen_salt('bf'))), -- Hashed password for Bob Brown
+(5, crypt('test55', gen_salt('bf'))); -- Hashed password for Charlie Davis

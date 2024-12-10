@@ -5,6 +5,7 @@ SELECT
     ud.date_of_birth,
     ud.is_verified_flag,
     ud.gender,
+    ud.profile_id,
     cd.phone,
     cd.email,
     cd.current_location,

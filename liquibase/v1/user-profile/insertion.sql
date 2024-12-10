@@ -90,7 +90,8 @@ INSERT INTO profession (profession_name, description) VALUES
 ('Interior Designer', 'Plans and designs interior spaces'),
 ('Data Scientist', 'Analyzes complex data sets to find patterns'),
 ('Physical Therapist', 'Helps patients recover physical abilities'),
-('Human Resources Manager', 'Manages employee relations and recruitment');
+('Human Resources Manager', 'Manages employee relations and recruitment'),
+('Others', 'Others');
 
 INSERT INTO profile_created_by (creator_name) VALUES
 ('Self'),
@@ -108,12 +109,14 @@ INSERT INTO looking_for (description) VALUES
 ('Casual Dating'),
 ('Networking');
 
-INSERT INTO user_details (date_of_birth, user_name, is_verified_flag) VALUES
-('1990-01-15', 'John Doe', true),
-('1985-05-20', 'Jane Smith', true),
-('1992-08-30', 'Alice Johnson', false),
-('1988-12-10', 'Bob Brown', true),
-('1995-03-25', 'Charlie Davis', false);
+
+INSERT INTO user_details (date_of_birth, first_name, middle_name, last_name,gender, is_verified_flag) VALUES 
+    ('1990-01-01', 'John', 'Middle', 'Doe', 'Male', true),
+    ('1985-06-15', 'Jane', 'Ann', 'Smith', 'Female', false),
+    ('2000-09-30', 'Bob', 'Robert', 'Jones', 'Male', true),
+    ('1992-04-10', 'Alice', 'Marie', 'Taylor', 'Female', false),
+    ('1988-12-22', 'Charlie', 'Lee', 'Brown', 'Male', true);
+
 
 INSERT INTO contact_details (user_id, phone, email, current_location) VALUES
 (1, '+91 98765 43210', 'john.doe@example.com', 'Mumbai, India'),
